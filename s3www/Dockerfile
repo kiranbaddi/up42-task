@@ -12,21 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.21
+FROM golang:1.24 AS builder
 
+# Download licenses
 RUN \
     mkdir -p /licenses && \
     curl -s -q https://raw.githubusercontent.com/harshavardhana/s3www/master/CREDITS -o /licenses/CREDITS && \
     curl -s -q https://raw.githubusercontent.com/harshavardhana/s3www/master/LICENSE -o /licenses/LICENSE
 
-FROM scratch
+# Set working directory and copy source code
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+# Build the application for Alpine (musl libc)
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o s3www .
+
+FROM golang:1.24-alpine
 
 EXPOSE 8080
 
 # Copy CA certificates to prevent x509: certificate signed by unknown authority errors
-COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=0 /licenses /licenses
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /licenses /licenses
+COPY --from=builder /app/s3www /s3www
 
-COPY s3www /s3www
+WORKDIR /
 
 ENTRYPOINT ["/s3www"]
