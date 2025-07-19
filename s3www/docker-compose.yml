@@ -47,6 +47,24 @@ services:
     depends_on:
       - minio
 
+  s3www:    
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: s3www
+    environment:
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY=$MINIO_SECRET_KEY
+      - MINIO_BUCKET=$MINIO_BUCKET
+    command: ["-endpoint", "http://minio:9000", "-accesskey", "$MINIO_ACCESS_KEY", "-secretkey", "$MINIO_SECRET_KEY", "-bucket", "$MINIO_BUCKET"]
+    networks:
+      - up42-network
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mc-client
+
 volumes:
   minio_data:
     driver: local
