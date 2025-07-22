@@ -1,9 +1,9 @@
 ## Local Development
 
-- [ ] Install the application locally and test it with S3 for quick feedback
-- [ ] Containerize the applicaiton  
-- [ ] Write a Docker-compose file running the application and minio in the same network the for faster iteratino
-- [ ] Create Kubernetes Manifests for the application and deploy locally on kind cluster
+- [ X ] Install the application locally and test it with S3 for quick feedback
+- [ X ] Containerize the applicaiton  
+- [ X ] Write a Docker-compose file running the application and minio in the same network the for faster iteratino
+- [ X ] Create Kubernetes Manifests for the application and deploy locally on kind cluster
 - [ ] Create Helm chart.
 - [ ] Create Terraform Configuration for the helm chart.
 
@@ -51,4 +51,14 @@ When I asked Copilot what's causing the error in alpine image, the Dockerfile is
 
 The docker image is not as slim as the one with Scratch but we have a fully functioning image with golang:1.24-alpine 💯
 
+
+- Build docker container and storing it in Azure Container registry (as I plan to deploy the final helm chart with Terraform in AKS). 
+
+- Created Manifests for local testing before creating helm charts with them. 
+
+- Created a small script ot create ACR container and create a Kuberentes secret to pull images (for local deployment only)
+
+- Alternatively I could have used Dockerhub for containers but I want to use fewere providers as possible .
+
+- Tried creating a k8s job but it has taken longer than expected to mount a local directory as a Volume mount on Kind cluster. As we deploy the Helm chart with Terraform, I plan to use terraform templating to pass the file to th4e kuberentes job to upload to Minio bucket. 
 
