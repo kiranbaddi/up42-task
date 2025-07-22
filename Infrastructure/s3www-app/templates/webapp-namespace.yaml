@@ -1,0 +1,9 @@
+{{- if and .Values.webapp.enabled .Values.webapp.namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.webapp.namespace }}
+  labels:
+    {{- include "s3www.labels" . | nindent 4 }}
+    app.kubernetes.io/component: webapp-namespace
+{{- end }}

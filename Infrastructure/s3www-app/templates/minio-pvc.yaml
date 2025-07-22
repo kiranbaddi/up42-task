@@ -1,0 +1,23 @@
+{{- if .Values.minio.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+  {{- if .Values.minio.namespace }}
+  namespace: {{ .Values.minio.namespace }}
+  {{- end }}
+  labels:
+    {{- include "s3www.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.storageClass.enabled }}
+  storageClassName: {{ .Values.storageClass.name }}
+  {{- else }}
+  storageClassName: {{ .Values.minio.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.minio.persistence.size }}
+{{- end }}

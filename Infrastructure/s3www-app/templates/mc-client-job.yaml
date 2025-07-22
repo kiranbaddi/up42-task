@@ -1,0 +1,74 @@
+{{- if .Values.mcClientJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mc-client
+  {{- if .Values.minio.namespace }}
+  namespace: {{ .Values.minio.namespace }}
+  {{- end }}
+  labels:
+    {{- include "s3www.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mc-client
+spec:
+  ttlSecondsAfterFinished: {{ .Values.mcClientJob.ttlSecondsAfterFinished }}
+  template:
+    spec:
+      containers:
+      - name: minio-client
+        image: "{{ .Values.mcClientJob.image.repository }}:{{ .Values.mcClientJob.image.tag }}"
+        imagePullPolicy: {{ .Values.mcClientJob.image.pullPolicy }}
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Creating index.html file..."
+            cat > index.html <<EOF
+            <html>
+            <head>
+              <title>UP42 Task</title>
+            </head>
+            <body>
+              <h1>UP42 Task</h1>
+              <p>This is a sample HTML file for the UP42 task.</p>
+            </body>
+            </html>
+            EOF
+            cat index.html
+            # Configure MinIO client
+            {{- if .Values.minio.namespace }}
+            mc alias set myminio http://minio.{{ .Values.minio.namespace }}.svc.cluster.local:{{ .Values.minio.service.port }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --insecure
+            {{- else }}
+            mc alias set myminio http://minio.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.minio.service.port }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --insecure
+            {{- end }}
+
+            # Create bucket if it doesn't exist
+            mc mb myminio/{{ .Values.webapp.bucket }} --ignore-existing --insecure
+            ls -l /data
+            # Upload the file
+            mc cp index.html myminio/{{ .Values.webapp.bucket }}/ --insecure
+
+            # Verify upload
+            mc ls myminio/{{ .Values.webapp.bucket }}/index.html --insecure
+
+            echo "File uploaded successfully to MinIO"
+        resources:
+          {{- toYaml .Values.mcClientJob.resources | nindent 10 }}
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: accesskey
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: secretkey
+        volumeMounts:
+        - name: minio-data
+          mountPath: /data
+      volumes:
+      - name: minio-data
+        persistentVolumeClaim:
+          claimName: minio-pvc
+      restartPolicy: Never
+{{- end }}
