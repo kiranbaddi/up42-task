@@ -20,6 +20,15 @@ spec:
       labels:
         {{- include "s3www.labels" . | nindent 8 }}
         app.kubernetes.io/component: webapp
+      {{- if .Values.webapp.annotations }}
+      annotations:
+        {{- range $key, $value := .Values.webapp.annotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- if .Values.webapp.environment }}
+        prometheus.io/environment: {{ .Values.webapp.environment | quote }}
+        {{- end }}
+      {{- end }}
     spec:
       containers:
       - name: webapp
@@ -51,6 +60,8 @@ spec:
           failureThreshold: {{ .Values.webapp.readinessProbe.failureThreshold }}
         {{- end }}
         env:
+        - name: ENVIRONMENT
+          value: {{ .Values.webapp.environment | default "development" | quote }}
         - name: S3WWW_ENDPOINT
           {{- if .Values.minio.namespace }}
           value: "http://minio.{{ .Values.minio.namespace }}.svc.cluster.local:{{ .Values.minio.service.port }}"
