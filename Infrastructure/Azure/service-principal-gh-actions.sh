@@ -4,7 +4,7 @@
 # You can change these variables
 RESOURCE_GROUP_NAME="up42"
 ACR_NAME="s3wwwapp"             
-KEYVAULT_NAME="up42-kv"         
+KEYVAULT_NAME="up42-kv-development"     
 SP_NAME="aks-ci-cd-sp"
 
 # --- Get current subscription and tenant details ---
