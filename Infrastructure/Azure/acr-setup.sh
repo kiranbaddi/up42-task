@@ -1,5 +1,6 @@
 #!/bin/bash
-set -ev
+set -e
+
 
 ACR_NAME="s3wwwapp"
 # Check if the ACR already exists if not create create
