@@ -20,31 +20,17 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            echo "Creating index.html file..."
-            cat > index.html <<EOF
-            <html>
-            <head>
-              <title>UP42 Task</title>
-            </head>
-            <body>
-              <h1>UP42 Task</h1>
-              <p>This is a sample HTML file for the UP42 task.</p>
-            </body>
-            </html>
-            EOF
-            cat index.html
-            # Configure MinIO client
-            {{- if .Values.minio.namespace }}
-            mc alias set myminio http://minio.{{ .Values.minio.namespace }}.svc.cluster.local:{{ .Values.minio.service.port }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --insecure
-            {{- else }}
-            mc alias set myminio http://minio.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.minio.service.port }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --insecure
-            {{- end }}
-
+            # Wait for MinIO to be ready
+            until mc config host add myminio http://minio-service:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --insecure; do
+              echo "Waiting for MinIO to be ready..."
+              sleep 5
+            done
+            
             # Create bucket if it doesn't exist
             mc mb myminio/{{ .Values.webapp.bucket }} --ignore-existing --insecure
-            ls -l /data
-            # Upload the file
-            mc cp index.html myminio/{{ .Values.webapp.bucket }}/ --insecure
+            
+            # Upload the HTML file from mounted ConfigMap
+            mc cp /html-content/index.html myminio/{{ .Values.webapp.bucket }}/ --insecure
 
             # Verify upload
             mc ls myminio/{{ .Values.webapp.bucket }}/index.html --insecure
@@ -64,9 +50,14 @@ spec:
               name: minio-secret
               key: secretkey
         volumeMounts:
+        - name: html-content
+          mountPath: /html-content
         - name: minio-data
           mountPath: /data
       volumes:
+      - name: html-content
+        configMap:
+          name: webapp-html-content
       - name: minio-data
         persistentVolumeClaim:
           claimName: minio-pvc

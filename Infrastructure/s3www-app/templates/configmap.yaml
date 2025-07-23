@@ -1,0 +1,15 @@
+{{- if .Values.mcClientJob.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-html-content
+  {{- if .Values.minio.namespace }}
+  namespace: {{ .Values.minio.namespace }}
+  {{- end }}
+  labels:
+    {{- include "s3www.labels" . | nindent 4 }}
+    app.kubernetes.io/component: webapp-content
+data:
+  index.html: |
+{{ .Values.webapp.htmlContent | indent 4 }}
+{{- end }}
