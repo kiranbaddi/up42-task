@@ -21,6 +21,15 @@ spec:
       labels:
         {{- include "s3www.labels" . | nindent 8 }}
         app.kubernetes.io/component: minio
+      {{- if .Values.minio.annotations }}
+      annotations:
+        {{- range $key, $value := .Values.minio.annotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- if .Values.minio.environment }}
+        prometheus.io/environment: {{ .Values.minio.environment | quote }}
+        {{- end }}
+      {{- end }}
     spec:
       containers:
         - name: minio
@@ -30,6 +39,8 @@ spec:
             {{- toYaml .Values.minio.resources | nindent 12 }}
           args: ["server", "/data"]
           env:
+            - name: ENVIRONMENT
+              value: {{ .Values.minio.environment | default "development" | quote }}
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
