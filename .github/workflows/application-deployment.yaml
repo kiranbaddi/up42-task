@@ -37,7 +37,7 @@ jobs:
         id: kv-secrets
         uses: azure/get-keyvault-secrets@v1
         with:
-          keyvault: 'up42-kv'
+          keyvault: 'up42-kv-${{ github.event.inputs.environment }}'
           secrets: |
             azure-client-password
             azure-client-username
