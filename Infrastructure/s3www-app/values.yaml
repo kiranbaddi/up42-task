@@ -68,6 +68,7 @@ webapp:
   service:
     port: 8080
   bucket: up42
+  htmlFile: ""  # This will be populated by Terraform with file content
   resources:
     requests:
       memory: "128Mi"
@@ -117,6 +118,17 @@ mcClientJob:
 
 # Storage class configuration
 storageClass:
+  enabled: true
+  name: local-storage
+  provisioner: rancher.io/local-path
+  # skuName: Standard_LRS # If you are using Azure, you can specify the SKU name here.
+  type: default
+  fsType: ext4
+  volumeBindingMode: WaitForFirstConsumer
+  reclaimPolicy: Delete
+  isDefault: true
+  allowVolumeExpansion: true
+  mountOptions: []
   enabled: true
   name: local-storage
   provisioner: rancher.io/local-path
