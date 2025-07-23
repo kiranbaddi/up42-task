@@ -14,7 +14,7 @@ KEYVAULT_NAME="up42-kv-$ENVIRONMENT"
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $K8s_CLUSTER_NAME --file /tmp/aks-config.yaml
 export KUBECONFIG=/tmp/aks-config.yaml
 
-# Get Azure service principal credentials
+# Get Azure service principal credentials for Image Pull Secret
 PASSWORD=$(az ad sp create-for-rbac --name "K8s-sp" --scopes $(az acr show --name $ACR_NAME --query "id" --output tsv) --role acrpull --query "password" --output tsv)
 USER_NAME=$(az ad sp list --display-name "K8s-sp" --query "[].appId" --output tsv)
 
@@ -45,13 +45,14 @@ terraform plan -out=tfplan
 terraform apply -auto-approve
 
 
-
-rm -rf /tmp/aks-config.yaml
 if [ $? -ne 0 ]; then
     echo "Terraform apply failed. Please check the logs."
     exit 1
 else
     echo "Terraform apply completed successfully."
-    echo "Deployment for $ENVIRONMENT environment is complete."
-    echo "You can access the application at http://up42.$ENVIRONMENT.devopsgym.com"
-fi
+    echo "Deployment for environment '$ENVIRONMENT' is complete."
+fi  
+
+rm -rf /tmp/aks-config.yaml
+echo "Temporary AKS configuration file removed."
+echo "All operations completed successfully."
