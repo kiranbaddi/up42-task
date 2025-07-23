@@ -33,6 +33,13 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Check logged in user
+        run: az account show
+      - name: Debug
+        run: |
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          az keyvault list --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "[].name" --output table
+          az keyvault secret list --vault-name "up42-kv-${{ github.event.inputs.environment }}" --query "[].name" --output table
       - name: Get Secrets from KeyVault
         id: kv-secrets
         uses: azure/get-keyvault-secrets@v1
