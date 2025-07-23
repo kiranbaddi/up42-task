@@ -34,6 +34,7 @@ affinity: {}
 minio:
   enabled: true
   namespace: minio
+  environment: 
   image:
     repository: minio/minio
     tag: latest
@@ -45,8 +46,8 @@ minio:
     size: 10Gi
     storageClass: standard
   credentials:
-    accessKey: minio
-    secretKey: minio12345
+    accessKey: 
+    secretKey: 
   resources:
     requests:
       memory: "128Mi"
@@ -59,6 +60,7 @@ minio:
 webapp:
   enabled: true
   namespace: webapp
+  environment: 
   image:
     repository: s3wwwapp.azurecr.io/s3www
     tag: 1.0.0
@@ -118,6 +120,11 @@ storageClass:
   enabled: true
   name: local-storage
   provisioner: rancher.io/local-path
+  # skuName: Standard_LRS # If you are using Azure, you can specify the SKU name here.
+  type: default
+  fsType: ext4
   volumeBindingMode: WaitForFirstConsumer
   reclaimPolicy: Delete
   isDefault: true
+  allowVolumeExpansion: true
+  mountOptions: []
