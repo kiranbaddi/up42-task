@@ -1,0 +1,57 @@
+name: Application Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+variables:
+  AZURE_RESOURCE_GROUP: "up42"
+  AKS_CLUSTER_NAME: "up42-aks"
+  HELM_RELEASE_NAME: "s3www"
+jobs:
+  deploy: 
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Get Secrets from KeyVault
+        uses: azure/get-keyvault-secrets@v1
+        with:
+          keyvault: 'up42-kv'
+          secrets: |
+            AZURE_SP_CLIENT_ID
+            AZURE_SP_CLIENT_SECRET
+            AZURE_SP_TENANT_ID
+            MINIO_ACCESS_KEY
+            MINIO_SECRET_KEY
+
+      - name: Retrieve Kubernetes Config
+        run: |
+          az aks get-credentials --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ vars.AKS_CLUSTER_NAME }} --admin
+          kubectl config use-context ${{ vars.AKS_CLUSTER_NAME }}
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+
+      - name: Check K8s Context
+        run:
+           |
+           kubectl config current-context
+           kubectl get nodes
+
+           
