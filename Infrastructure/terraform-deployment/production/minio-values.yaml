@@ -1,0 +1,45 @@
+# Bitnami MinIO Configuration
+mode: standalone
+
+# Authentication
+auth:
+  rootUser: ""  # Will be set via Terraform
+  rootPassword: ""  # Will be set via Terraform
+  
+# Deployment configuration
+defaultBuckets: "up42"
+
+# Persistence
+persistence:
+  enabled: true
+  size: 10Gi
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    api: 9000
+    console: 9001
+
+# Ingress configuration
+ingress:
+  enabled: true
+  ingressClassName: ""
+  hostname: minio.local
+  path: /
+
+# Console ingress
+consoleIngress:
+  enabled: false
+
+# Resources
+resources:
+  limits: {}
+  requests: {}
+
+# Metrics for Prometheus
+metrics:
+  serviceMonitor:
+    enabled: false
+    labels:
+      release: prometheus

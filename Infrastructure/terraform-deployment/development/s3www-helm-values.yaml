@@ -1,0 +1,78 @@
+# Default values for s3www.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global configuration
+enabled: true
+environment: development
+# Image configuration
+image:
+  repository: s3wwwapp.azurecr.io/s3www
+  tag: 1.0.0
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+
+# S3 bucket name
+minio:
+  enabled: true
+  namespace: "minio"
+  bucket: up42
+  service:
+    name: minio
+    port: 9000 
+
+minioClientJob:
+  enabled: true
+
+htmlContent:
+# Pod annotations
+annotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+  prometheus.io/environment: "development"
+
+# Resource limits and requests
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  host: up42.devopsgym.com
+
+# Image pull secret configuration
+imagePullSecret:
+  enabled: true
+  name: webapp-image-pull-secret
+  server: s3wwwapp.azurecr.io
+  username: 
+  password: 
+
+# Liveness probe configuration
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+# Readiness probe configuration
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
