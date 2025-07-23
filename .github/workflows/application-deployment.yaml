@@ -12,6 +12,11 @@ on:
           - development
           - staging
           - production
+      plan_only:
+        description: 'Only run terraform plan (no apply)'
+        required: false
+        default: false
+        type: boolean
 jobs:
   deploy: 
     runs-on: ubuntu-latest
@@ -29,29 +34,74 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Get Secrets from KeyVault
+        id: kv-secrets
         uses: azure/get-keyvault-secrets@v1
         with:
           keyvault: 'up42-kv'
           secrets: |
-            AZURE_SP_CLIENT_ID
-            AZURE_SP_CLIENT_SECRET
-            AZURE_SP_TENANT_ID
-            MINIO_ACCESS_KEY
-            MINIO_SECRET_KEY
+            azure-client-password
+            azure-client-username
+            azure-sp-client-secret
+            minio-access-key
+            minio-secret-key
+
+      - name: Get Azure Service Principal Credentials
+        run: |
+          # Get or create service principal for ACR access
+          SP_CLIENT_PASSWORD=$(az ad sp create-for-rbac --name "K8s-sp" --scopes $(az acr show --name s3wwwapp --query "id" --output tsv) --role acrpull --query "password" --output tsv 2>/dev/null || echo "${{ steps.kv-secrets.outputs.azure-sp-client-secret }}")
+          SP_USER_NAME=$(az ad sp list --display-name "K8s-sp" --query "[].appId" --output tsv)
+          echo "SP_CLIENT_PASSWORD=$SP_CLIENT_PASSWORD" >> $GITHUB_ENV
+          echo "SP_USER_NAME=$SP_USER_NAME" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Set Terraform Variables
+        run: |
+          echo "TF_VAR_environment=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          echo "TF_VAR_minio_namespace=minio" >> $GITHUB_ENV
+          echo "TF_VAR_webapp_enabled=true" >> $GITHUB_ENV
+          echo "TF_VAR_webapp_namespace=webapp" >> $GITHUB_ENV
+          echo "TF_VAR_webapp_image_repository=s3wwwapp.azurecr.io/s3www" >> $GITHUB_ENV
+          echo "TF_VAR_webapp_image_tag=1.0.0" >> $GITHUB_ENV
+          echo "TF_VAR_image_pull_secret_username=$SP_USER_NAME" >> $GITHUB_ENV
+          echo "TF_VAR_image_pull_secret_password=$SP_CLIENT_PASSWORD" >> $GITHUB_ENV
+          echo "TF_VAR_minio_access_key=${{ steps.kv-secrets.outputs.minio-access-key }}" >> $GITHUB_ENV
+          echo "TF_VAR_minio_secret_key=${{ steps.kv-secrets.outputs.minio-secret-key }}" >> $GITHUB_ENV
+          echo "TF_VAR_nginx_ingress_enabled=true" >> $GITHUB_ENV
 
       - name: Retrieve Kubernetes Config
         run: |
-          az aks get-credentials --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ vars.AKS_CLUSTER_NAME }} --admin
-          kubectl config use-context ${{ vars.AKS_CLUSTER_NAME }}
-      - name: Setup Kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: 'latest'
+          az aks get-credentials --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.AKS_CLUSTER_NAME }} --file /tmp/aks-config.yaml
+          echo "KUBECONFIG=/tmp/aks-config.yaml" >> $GITHUB_ENV
 
-      - name: Check K8s Context
-        run:
-           |
-           kubectl config current-context
-           kubectl get nodes
+      - name: Terraform Init
+        working-directory: Infrastructure/terraform-deployment
+        run: terraform init -upgrade
 
-           
+      - name: Terraform Workspace
+        working-directory: Infrastructure/terraform-deployment
+        run: terraform workspace select ${{ github.event.inputs.environment }} || terraform workspace new ${{ github.event.inputs.environment }}
+
+      - name: Terraform Plan
+        working-directory: Infrastructure/terraform-deployment
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: Infrastructure/terraform-deployment
+        run: terraform apply -auto-approve
+
+      - name: Deployment Complete
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        run: |
+          echo "Deployment for ${{ github.event.inputs.environment }} environment is complete."
+          echo "You can access the application at http://up42.${{ github.event.inputs.environment }}.devopsgym.com"
+
+      - name: Plan Only Complete
+        if: ${{ github.event.inputs.plan_only == 'true' }}
+        run: |
+          echo "Terraform plan completed for ${{ github.event.inputs.environment }} environment."
+          echo "Review the plan above before running the full deployment."
