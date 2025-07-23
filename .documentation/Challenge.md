@@ -75,3 +75,40 @@ Helm release often breaks because there is no main Release and the webapp namesp
 
 Hence decided to use official minio helm chart and a stand-alone job in terraform deployment and just limit the chart to s3www resources only. 
 
+
+
+
+## Trade-offs and Alternative considerations
+
+1. Minio could be deployed outside the helm chart to ensure the chart is minimal and consists only the application and it's allied resources such as service, ingress etc. 
+
+- Alternative #1  - Add minio as a dependent chart 
+
+Chart.yaml
+
+```yaml
+apiVersion: v2
+name: s3www
+description: A Helm chart for deploying S3WWW application.
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: minio
+    version: "7.1.1"
+    repository: "https://operator.min.io/"
+    condition: minio.enabled
+```
+
+```values.yaml
+# s3www chart values
+minio:
+  replicaCount: 3
+
+
+- Alternative #2 - Install Minio helm chart and Minio Job as separate resources using Terraform.
+
+
+2. Image Pull Secret is created within the helm chart. This can be outside the chart as it's more of an Infrastrructure resource.
+  Also the `.dockerconfigjson` can be stored inside KeyVault rather than creating PASSWORD for every deployment.
