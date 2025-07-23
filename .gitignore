@@ -1,2 +1,6 @@
 local*
 **/*.env
+**/terraform.tfstate*
+**/terraform.tfvars
+**/.terraform
+**/tfplan*
