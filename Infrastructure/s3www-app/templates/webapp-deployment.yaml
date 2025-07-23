@@ -63,11 +63,13 @@ spec:
         - name: S3WWW_ENDPOINT
           {{- if .Values.minio.namespace }}
           value: "http://minio.{{ .Values.minio.namespace }}.svc.cluster.local:{{ .Values.minio.service.port }}"
+          {{- else if .Values.minio.endpoint }}
+          value: "{{ .Values.minio.endpoint }}"
           {{- else }}
           value: "http://minio:{{ .Values.minio.service.port }}"
           {{- end }}
         - name: S3WWW_BUCKET
-          value: "{{ .Values.bucket }}"
+          value: "{{ .Values.minio.bucket }}"
         - name: S3WWW_ACCESS_KEY
           valueFrom:
             secretKeyRef:
@@ -91,23 +93,7 @@ spec:
       {{- with .Values.imagePullSecrets }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      initContainers:
-      - name: wait-for-minio
-        image: busybox:latest
-        command: ['sh', '-c']
-        args:
-        - |
-          echo "Waiting for MinIO to be ready..."
-          {{- if .Values.minio.namespace }}
-          until nc -z minio.{{ .Values.minio.namespace }}.svc.cluster.local {{ .Values.minio.service.port }}; do
-            echo "Waiting for minio.{{ .Values.minio.namespace }}.svc.cluster.local:{{ .Values.minio.service.port }}..."
-          {{- else }}
-          until nc -z minio {{ .Values.minio.service.port }}; do
-            echo "Waiting for minio:{{ .Values.minio.service.port }}..."
-          {{- end }}
-            sleep 2
-          done
-          echo "MinIO is ready!"
+
 ---
 {{- if .Values.minio.enabled }}
 apiVersion: v1
