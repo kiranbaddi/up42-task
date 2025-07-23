@@ -9,9 +9,10 @@
 
 - [Summary](#summary)
 - [Prerequisites](#prerequisites)
+- [Deployment](#deployment)
 - [Terraform](#terraform)
 - [Helm Chart](#helm-chart)
-- [Appendix](#Appendix)
+
 
 ## Summary
 
@@ -114,10 +115,3 @@ az role assignment create \
 ```
 
 - Use [Keyvault Setup Script ](./Infrastructure/Azure/az-keyvault-setup.sh) to create KeyVault for a particular environment. 
-
-### Prometheus Installation
-
-```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm install prometheus prometheus-community/kube-prometheus-stack
-```
