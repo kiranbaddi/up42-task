@@ -41,7 +41,6 @@ jobs:
           secrets: |
             azure-client-password
             azure-client-username
-            azure-sp-client-secret
             minio-access-key
             minio-secret-key
 
