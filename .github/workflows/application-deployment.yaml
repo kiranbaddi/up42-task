@@ -12,14 +12,14 @@ on:
           - development
           - staging
           - production
-variables:
-  AZURE_RESOURCE_GROUP: "up42"
-  AKS_CLUSTER_NAME: "up42-aks"
-  HELM_RELEASE_NAME: "s3www"
 jobs:
   deploy: 
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
+    env:
+      AZURE_RESOURCE_GROUP: "up42"
+      AKS_CLUSTER_NAME: "up42-aks"
+      HELM_RELEASE_NAME: "s3www"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
