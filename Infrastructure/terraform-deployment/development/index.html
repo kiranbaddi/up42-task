@@ -1,139 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S3WWW Project - Development Environment</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>S3WWW Project - Development Environment</title>
+    </head>
+    <body>
+        <header>
+            <h1>S3WWW Project</h1>
+            <p>Static Website Hosting with S3-Compatible Storage</p>
+        </header>
         
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #f4f4f4;
-        }
-        
-        header {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-        }
-        
-        .content {
-            text-align: center;
-            max-width: 800px;
-            background: white;
-            padding: 3rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .content h2 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 2.5rem;
-        }
-        
-        .content p {
-            color: #666;
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        
-        .feature {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 5px;
-            border-left: 4px solid #007bff;
-        }
-        
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: auto;
-        }
-        
-        .environment-badge {
-            background-color: #28a745;
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-top: 1rem;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>S3WWW Project</h1>
-        <p>Static Website Hosting with S3-Compatible Storage</p>
-    </header>
-    
-    <main>
-        <div class="content">
-            <h2>Welcome to S3WWW</h2>
-            <p>
-                S3WWW is a powerful and lightweight solution for hosting static websites 
-                using S3-compatible storage backends. This project provides a seamless 
-                way to serve web content directly from object storage with high availability 
-                and scalability.
-            </p>
-            
-            <div class="features">
-                <div class="feature">
-                    <h3>🚀 Fast Deployment</h3>
-                    <p>Quick setup with Docker and Kubernetes support</p>
+        <main>
+            <div>
+                <h2>Welcome to S3WWW</h2>
+                <p>
+                    S3WWW is a powerful and lightweight solution for hosting static websites 
+                    using S3-compatible storage backends. This project provides a seamless 
+                    way to serve web content directly from object storage with high availability 
+                    and scalability.
+                </p>
+                
+                <div>
+                    <h3>Features:</h3>
+                    <ul>
+                        <li>Fast Deployment - Quick setup with Docker and Kubernetes support</li>
+                        <li>Cloud Native - Works with AWS S3 and minio and other S3-compatible storage</li>
+                        <li>Configurable - Flexible configuration for different environments</li>
+                        <li>Monitoring - Built-in health checks and monitoring capabilities</li>
+                    </ul>
                 </div>
-                <div class="feature">
-                    <h3>☁️ Cloud Native</h3>
-                    <p>Works with AWS S3, MinIO, and other S3-compatible storage</p>
-                </div>
-                <div class="feature">
-                    <h3>🔧 Configurable</h3>
-                    <p>Flexible configuration for different environments</p>
-                </div>
-                <div class="feature">
-                    <h3>📊 Monitoring</h3>
-                    <p>Built-in health checks and monitoring capabilities</p>
+                
+                <div>
+                    <strong>Environment: Development</strong>
                 </div>
             </div>
-            
-            <div class="environment-badge">
-                Development Environment
-            </div>
-        </div>
-    </main>
-    
-    <footer>
-        <p> S3WWW Project. Built with ❤️ for modern web hosting.</p>
-        <p>Built with Go, Deployed with Helm/p>
-    </footer>
-</body>
+        </main>
+        
+        <footer>
+            <p>S3WWW Project. Built with love for modern web hosting.</p>
+            <p>Built with Go. Deployed with Helm</p>
+        </footer>
+    </body>
 </html>
