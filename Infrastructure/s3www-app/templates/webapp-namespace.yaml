@@ -1,8 +1,8 @@
-{{- if and .Values.webapp.enabled .Values.webapp.namespace }}
+{{- if .Values.enabled }}
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Values.webapp.namespace }}
+  name: {{ .Release.Namespace }}
   labels:
     {{- include "s3www.labels" . | nindent 4 }}
     app.kubernetes.io/component: webapp-namespace

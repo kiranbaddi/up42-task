@@ -1,11 +1,9 @@
-{{- if .Values.webapp.enabled }}
+{{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "s3www.fullname" . }}-webapp
-  {{- if .Values.webapp.namespace }}
-  namespace: {{ .Values.webapp.namespace }}
-  {{- end }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "s3www.labels" . | nindent 4 }}
     app.kubernetes.io/component: webapp
@@ -20,48 +18,48 @@ spec:
       labels:
         {{- include "s3www.labels" . | nindent 8 }}
         app.kubernetes.io/component: webapp
-      {{- if .Values.webapp.annotations }}
+      {{- if .Values.annotations }}
       annotations:
-        {{- range $key, $value := .Values.webapp.annotations }}
+        {{- range $key, $value := .Values.annotations }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
-        {{- if .Values.webapp.environment }}
-        prometheus.io/environment: {{ .Values.webapp.environment | quote }}
+        {{- if .Values.environment }}
+        prometheus.io/environment: {{ .Values.environment | quote }}
         {{- end }}
       {{- end }}
     spec:
       containers:
       - name: webapp
-        image: "{{ .Values.webapp.image.repository }}:{{ .Values.webapp.image.tag }}"
-        imagePullPolicy: {{ .Values.webapp.image.pullPolicy }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: {{ .Values.webapp.service.port }}
+        - containerPort: {{ .Values.service.port }}
           name: http
-        {{- if .Values.webapp.livenessProbe.enabled }}
+        {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /
             port: http
-          initialDelaySeconds: {{ .Values.webapp.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.webapp.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.webapp.livenessProbe.timeoutSeconds }}
-          successThreshold: {{ .Values.webapp.livenessProbe.successThreshold }}
-          failureThreshold: {{ .Values.webapp.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
         {{- end }}
-        {{- if .Values.webapp.readinessProbe.enabled }}
+        {{- if .Values.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
             path: /
             port: http
-          initialDelaySeconds: {{ .Values.webapp.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.webapp.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.webapp.readinessProbe.timeoutSeconds }}
-          successThreshold: {{ .Values.webapp.readinessProbe.successThreshold }}
-          failureThreshold: {{ .Values.webapp.readinessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
         {{- end }}
         env:
         - name: ENVIRONMENT
-          value: {{ .Values.webapp.environment | default "development" | quote }}
+          value: {{ .Values.environment | default "development" | quote }}
         - name: S3WWW_ENDPOINT
           {{- if .Values.minio.namespace }}
           value: "http://minio.{{ .Values.minio.namespace }}.svc.cluster.local:{{ .Values.minio.service.port }}"
@@ -69,7 +67,7 @@ spec:
           value: "http://minio:{{ .Values.minio.service.port }}"
           {{- end }}
         - name: S3WWW_BUCKET
-          value: "{{ .Values.webapp.bucket }}"
+          value: "{{ .Values.bucket }}"
         - name: S3WWW_ACCESS_KEY
           valueFrom:
             secretKeyRef:
@@ -83,12 +81,12 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          ./s3www -endpoint $S3WWW_ENDPOINT -bucket $S3WWW_BUCKET -accessKey $S3WWW_ACCESS_KEY -secretKey $S3WWW_SECRET_KEY -address 0.0.0.0:{{ .Values.webapp.service.port }}
+          ./s3www -endpoint $S3WWW_ENDPOINT -bucket $S3WWW_BUCKET -accessKey $S3WWW_ACCESS_KEY -secretKey $S3WWW_SECRET_KEY -address 0.0.0.0:{{ .Values.service.port }}
         resources:
-          {{- toYaml .Values.webapp.resources | nindent 10 }}
+          {{- toYaml .Values.resources | nindent 10 }}
       imagePullSecrets:
-      {{- if .Values.webapp.imagePullSecret.enabled }}
-      - name: {{ .Values.webapp.imagePullSecret.name }}
+      {{- if .Values.imagePullSecret.enabled }}
+      - name: {{ .Values.imagePullSecret.name }}
       {{- end }}
       {{- with .Values.imagePullSecrets }}
         {{- toYaml . | nindent 8 }}
@@ -116,11 +114,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ include "s3www.fullname" . }}-webapp-minio-secret
-  {{- if .Values.webapp.namespace }}
-  namespace: {{ .Values.webapp.namespace }}
-  {{- else }}
   namespace: {{ .Release.Namespace }}
-  {{- end }}
   labels:
     {{- include "s3www.labels" . | nindent 4 }}
     app.kubernetes.io/component: webapp-minio-credentials

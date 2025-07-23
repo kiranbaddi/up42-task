@@ -62,3 +62,16 @@ The docker image is not as slim as the one with Scratch but we have a fully func
 
 - Tried creating a k8s job but it has taken longer than expected to mount a local directory as a Volume mount on Kind cluster. As we deploy the Helm chart with Terraform, I plan to use terraform templating to pass the file to th4e kuberentes job to upload to Minio bucket. 
 
+
+
+### Storage Class
+
+Already created a storage class and when creating the stroageClass as part of the helm chart it throws the error that existing Storage Class is not managed by Helm. Disabled Storage class from custom values file.
+
+
+### Namespace
+
+Helm release often breaks because there is no main Release and the webapp namespace is not created before the deployment of the webapp itself. 
+
+Hence decided to use official minio helm chart and a stand-alone job in terraform deployment and just limit the chart to s3www resources only. 
+

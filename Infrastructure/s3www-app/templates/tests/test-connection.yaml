@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "s3www.fullname" . }}:{{ .Values.webapp.service.port }}']
+      args: ['{{ include "s3www.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

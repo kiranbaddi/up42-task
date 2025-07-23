@@ -3,9 +3,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "s3www.fullname" . }}
-  {{- if .Values.webapp.namespace }}
-  namespace: {{ .Values.webapp.namespace }}
-  {{- end }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "s3www.labels" . | nindent 4 }}
 spec:

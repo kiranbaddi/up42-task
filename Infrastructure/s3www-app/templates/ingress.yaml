@@ -1,25 +1,23 @@
-{{- if .Values.webapp.ingress.enabled -}}
+{{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "s3www.fullname" . }}-webapp-ingress
-  {{- if .Values.webapp.namespace }}
-  namespace: {{ .Values.webapp.namespace }}
-  {{- end }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "s3www.labels" . | nindent 4 }}
     app.kubernetes.io/component: webapp
-  {{- with .Values.webapp.ingress.annotations }}
+  {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.webapp.ingress.className }}
+  {{- with .Values.ingress.className }}
   ingressClassName: {{ . }}
   {{- end }}
-  {{- if .Values.webapp.ingress.tls }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- range .Values.webapp.ingress.tls }}
+    {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -28,8 +26,8 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-  {{- if .Values.webapp.ingress.hosts }}
-    {{- range .Values.webapp.ingress.hosts }}
+  {{- if .Values.ingress.hosts }}
+    {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -42,11 +40,11 @@ spec:
               service:
                 name: {{ include "s3www.fullname" $ }}-webapp
                 port:
-                  number: {{ $.Values.webapp.service.port }}
+                  number: {{ $.Values.service.port }}
           {{- end }}
     {{- end }}
-  {{- else if .Values.webapp.ingress.host }}
-    - host: {{ .Values.webapp.ingress.host | quote }}
+  {{- else if .Values.ingress.host }}
+    - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
         - path: /
@@ -55,6 +53,6 @@ spec:
             service:
               name: {{ include "s3www.fullname" . }}-webapp
               port:
-                number: {{ .Values.webapp.service.port }}
+                number: {{ .Values.service.port }}
   {{- end }}
 {{- end }}

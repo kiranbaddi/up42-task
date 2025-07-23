@@ -1,9 +1,0 @@
-{{- if and .Values.minio.enabled .Values.minio.namespace }}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.minio.namespace }}
-  labels:
-    {{- include "s3www.labels" . | nindent 4 }}
-    app.kubernetes.io/component: minio-namespace
-{{- end }}
